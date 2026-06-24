@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AussiePaw • Ethical Dogs for Sale Australia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .hero { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://source.unsplash.com/random/1600x900/?australian-dog') center/cover no-repeat; }
+        .pup-card { transition: all 0.3s; }
+        .pup-card:hover { transform: scale(1.05); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .star { color: #facc15; }
+        .floating-btn { position: fixed; bottom: 20px; right: 20px; z-index: 50; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- Navbar -->
+<nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-paw text-3xl text-amber-600"></i>
+            <span class="text-2xl font-bold text-gray-900">AussiePaw</span>
+        </div>
+        <div class="hidden md:flex gap-8 text-lg">
+            <a href="#" class="hover:text-amber-600">Puppies</a>
+            <a href="#" class="hover:text-amber-600">Breeds</a>
+            <a href="#" class="hover:text-amber-600">Breeders</a>
+            <a href="#" class="hover:text-amber-600">Adopt</a>
+            <a href="#" class="hover:text-amber-600">Blog</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="showRegisterModal()" class="px-5 py-2 border border-amber-600 text-amber-600 rounded-full hover:bg-amber-50 font-medium">Register</button>
+            <button onclick="showLoginModal()" class="px-5 py-2 border border-gray-600 text-gray-700 rounded-full hover:bg-gray-100">Login</button>
+            <button id="adminBtn" onclick="showListPuppyModal()" class="hidden bg-amber-600 text-white px-6 py-2 rounded-full font-medium hover:bg-amber-700">List a Puppy (Admin)</button>
+            <button id="logoutBtn" onclick="logoutUser()" class="hidden px-5 py-2 border border-red-600 text-red-600 rounded-full hover:bg-red-50 font-medium">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Register Modal -->
+<div id="registerModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+        <h2 class="text-3xl font-bold mb-6 text-center">Create Account</h2>
+        <input type="email" id="regEmail" placeholder="Email" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <input type="password" id="regPassword" placeholder="Password" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <button onclick="registerUser()" class="w-full bg-amber-600 text-white py-4 rounded-2xl font-semibold">Register</button>
+        <button onclick="hideRegisterModal()" class="w-full mt-3 text-gray-500">Close</button>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+        <h2 class="text-3xl font-bold mb-6 text-center">Login to Your Account</h2>
+        <input type="email" id="loginEmail" placeholder="Email" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <input type="password" id="loginPassword" placeholder="Password" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <button onclick="loginUser()" class="w-full bg-amber-600 text-white py-4 rounded-2xl font-semibold">Login</button>
+        <button onclick="hideLoginModal()" class="w-full mt-3 text-gray-500">Close</button>
+    </div>
+</div>
+
+<!-- Verification Modal -->
+<div id="verifyModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4">
+        <h2 class="text-3xl font-bold mb-6 text-center">Verify Your Email</h2>
+        <p class="text-center mb-4">Enter the 6-digit code sent to your email</p>
+        <input type="text" id="verifyCode" placeholder="123456" maxlength="6" class="w-full px-4 py-3 border rounded-2xl mb-4 text-center text-2xl tracking-widest">
+        <button onclick="verifyCode()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-semibold">Verify Account</button>
+        <button onclick="hideVerifyModal()" class="w-full mt-3 text-gray-500">Cancel</button>
+    </div>
+</div>
+
+
+<!-- List Puppy Modal (Admin Only) -->
+<div id="listPuppyModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-auto">
+        <h2 class="text-3xl font-bold mb-6 text-center">List a New Puppy</h2>
+        <input type="text" id="puppyName" placeholder="Puppy Name" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <input type="text" id="puppyBreed" placeholder="Breed" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <input type="text" id="puppyLocation" placeholder="Location" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <input type="number" id="puppyPrice" placeholder="Price in AUD" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <textarea id="puppyDesc" placeholder="Description" class="w-full px-4 py-3 border rounded-2xl mb-4 h-24"></textarea>
+        <div class="mb-4">
+            <label class="block text-sm font-medium mb-2">Upload Photo</label>
+            <input type="file" id="puppyPhoto" accept="image/*" class="w-full px-4 py-3 border rounded-2xl">
+        </div>
+        <button onclick="submitPuppyListing()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-semibold">Submit Listing</button>
+        <button onclick="hideListPuppyModal()" class="w-full mt-3 text-gray-500">Cancel</button>
+    </div>
+</div>
+
+<!-- Hero -->
+<section class="hero h-screen flex items-center text-white">
+    <div class="max-w-4xl mx-auto text-center px-6">
+        <h1 class="text-5xl md:text-7xl font-bold mb-6">Find Your Perfect Aussie Mate</h1>
+        <p class="text-xl md:text-2xl mb-8">Ethical breeders • Health-guaranteed puppies • Australia-wide</p>
+        <div class="max-w-md mx-auto bg-white/90 backdrop-blur rounded-3xl p-2">
+            <div class="bg-white rounded-3xl p-6 text-gray-900">
+                <input type="text" id="search" placeholder="Search Cavoodle, Labrador..." class="w-full px-4 py-3 border rounded-2xl focus:outline-none">
+                <button id="searchBtn" type="button" class="mt-4 w-full bg-amber-600 text-white py-4 rounded-2xl font-semibold">Find Puppies Near Me</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Bar -->
+<div class="bg-white py-4 border-b">
+    <div class="max-w-7xl mx-auto px-6 flex flex-wrap justify-center items-center gap-8 text-sm">
+        <div class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-green-600"></i> 100% Ethical Breeders</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-microchip text-blue-600"></i> Microchipped & Registered</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-heart text-red-600"></i> Health Guarantees</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-truck text-amber-600"></i> Australia-Wide Delivery</div>
+
+        <a href="https://www.trustpilot.com/review/aussiepaw.com.au" target="_blank" class="flex items-center gap-2 border rounded-2xl px-4 py-2 hover:shadow">
+            <img src="https://cdn.trustpilot.com/static/images/trustpilot-logo.svg" alt="Trustpilot" class="h-6">
+            <div><div class="flex text-yellow-400">★★★★★</div><div class="text-xs font-medium">4.9/5 • 2,847 reviews</div></div>
+        </a>
+
+        <a href="#" class="flex items-center gap-2 border rounded-2xl px-4 py-2 hover:shadow">
+            <i class="fa-brands fa-google text-2xl text-blue-600"></i>
+            <div><div class="flex text-yellow-400">★★★★★</div><div class="text-xs font-medium">4.98/5 • Google</div></div>
+        </a>
+    </div>
+</div>
+
+<!-- Featured Puppies -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+    <h2 class="text-4xl font-bold text-center mb-4">Puppies Ready for Their Forever Home</h2>
+    <p class="text-center text-gray-600 mb-12">Popular in Australia 2026</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="puppy-grid"></div>
+</section>
+
+<!-- Popular Breeds -->
+<section class="bg-gray-100 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-12">Popular Breeds in Australia</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div onclick="alert('Showing Cavoodles...')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">Cavoodle</div>
+            <div onclick="alert('Showing French Bulldogs...')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">French Bulldog</div>
+            <div onclick="alert('Showing Goldens...')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">Golden Retriever</div>
+            <div onclick="alert('Showing Labs...')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">Labrador</div>
+            <div onclick="alert('Showing Groodles...')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">Groodle</div>
+            <div onclick="alert('Showing Border Collies...')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">Border Collie</div>
+        </div>
+    </div>
+</section>
+
+<!-- 12 Customer Reviews -->
+<section class="max-w-7xl mx-auto px-6 py-20 bg-white">
+    <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold mb-4">What Aussie Families Are Saying</h2>
+        <p class="text-xl text-gray-600">Real 5-star reviews from happy dog parents</p>
+        <div class="flex justify-center gap-1 mt-4 text-3xl">
+            <i class="fa-solid fa-star star"></i><i class="fa-solid fa-star star"></i>
+            <i class="fa-solid fa-star star"></i><i class="fa-solid fa-star star"></i>
+            <i class="fa-solid fa-star star"></i>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">Average rating: 4.98/5 from 2,847 reviews</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8" id="reviews-grid"></div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white py-16">
+    <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-10">
+        <div><h3 class="text-xl font-bold mb-4">AussiePaw</h3><p>Connecting ethical breeders with loving homes across Australia.</p></div>
+        <div>
+            <h4 class="font-semibold mb-4">Quick Links</h4>
+            <ul class="space-y-2 text-sm">
+                <li><a href="#" class="hover:text-amber-400">Puppies for Sale</a></li>
+                <li><a href="#" class="hover:text-amber-400">Find a Breeder</a></li>
+                <li><a href="#" class="hover:text-amber-400">Adoption</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">Legal & Compliance</h4>
+            <ul class="space-y-2 text-sm">
+                <li>Microchip & BIN Compliant</li>
+                <li>State Regulations Followed</li>
+                <li>Privacy Policy</li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-semibold mb-4">Contact</h4>
+            <p>Support@aussiepaw.dog or call us on +61 489 980 105</p>
+            <p>11 Leeds St, Rhodes NSW 2138, Australia</p>
+        </div>
+    </div>
+    <div class="text-center text-xs mt-12 border-t border-gray-800 pt-6">©️ 2026 AussiePaw. All rights reserved.</div>
+</footer>
+
+<!-- Floating Messenger -->
+<button id="chatToggleBtn" onclick="openMessenger()" class="floating-btn bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition">
+    <i class="fa-solid fa-comment-dots text-3xl"></i>
+</button>
+
+<!-- Chat UI is lazy-loaded from /chat/ui and injected into the page when the user opens the messenger -->
+
+<script>
+    let isAdmin = false;
+    let isLoggedIn = false;
+    let authToken = null;
+    let userRole = null;
+    let pendingEmail = null;
+
+    const reviews = [
+        { name: "Sarah Thompson", location: "Melbourne, VIC", review: "We got our beautiful Cavoodle Luna through AussiePaw...", breed: "Cavoodle", date: "2 weeks ago" },
+        { name: "Michael Chen", location: "Sydney, NSW", review: "Bought a Golden Retriever puppy...", breed: "Golden Retriever", date: "1 month ago" },
+        { name: "Emma Wilson", location: "Brisbane, QLD", review: "Frenchie Bella is healthy...", breed: "French Bulldog", date: "3 weeks ago" },
+        { name: "David Rodriguez", location: "Perth, WA", review: "Labrador Cooper arrived perfect...", breed: "Labrador", date: "4 days ago" },
+        { name: "Olivia Brown", location: "Adelaide, SA", review: "Groodle puppy exceeded our expectations...", breed: "Groodle", date: "2 months ago" },
+        { name: "James Patel", location: "Hobart, TAS", review: "Cavoodle for my mum — she’s in love...", breed: "Cavoodle", date: "3 weeks ago" },
+        { name: "Sophie Nguyen", location: "Canberra, ACT", review: "Border Collie is smart and energetic...", breed: "Border Collie", date: "1 week ago" },
+        { name: "Liam Thompson", location: "Gold Coast, QLD", review: "French Bulldog arrived healthy...", breed: "French Bulldog", date: "5 days ago" },
+        { name: "Isabella Garcia", location: "Newcastle, NSW", review: "Golden Retriever is the sweetest...", breed: "Golden Retriever", date: "1 month ago" },
+        { name: "Noah Williams", location: "Darwin, NT", review: "Labrador thriving...", breed: "Labrador", date: "2 weeks ago" },
+        { name: "Mia Johnson", location: "Melbourne, VIC", review: "Obsessed with our new Cavoodle...", breed: "Cavoodle", date: "6 days ago" },
+        { name: "Lucas Anderson", location: "Sydney, NSW", review: "Groodle is amazing...", breed: "Groodle", date: "3 weeks ago" }
+    ];
+
+    async function getErrorMessage(response) {
+        try {
+            const data = await response.json();
+            return data.message || data.error || 'An error occurred';
+        } catch {
+            return 'An error occurred';
+        }
+    }
+
+    async function renderPuppies() {
+        const grid = document.getElementById('puppy-grid');
+        try {
+            const res = await fetch('/api/dogs');
+            if (!res.ok) { grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>'; return; }
+            const puppies = await res.json();
+            if (puppies.length === 0) { grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">No puppies listed yet.</p>'; return; }
+            grid.innerHTML = puppies.map(p => {
+                const imgSrc = p.imageUrl || 'https://placedog.net/400/300';
+                return `
+                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition">
+                    <img src="${imgSrc}" class="w-full object-cover" style="height:200px" alt="${p.name}">
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg">${p.name}</h3>
+                        <p class="text-amber-500 font-bold">$${p.price}</p>
+                        <p class="text-gray-500 text-sm">${p.breed} • ${p.location}</p>
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <button onclick="openMessenger()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
+                                <i class="fa-solid fa-envelope"></i> Message Us
+                            </button>
+                            <button onclick="window.open('https://wa.me/61489980105','_blank')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
+                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        } catch (e) {
+            grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>';
+        }
+    }
+
+    function renderReviews() {
+        const grid = document.getElementById('reviews-grid');
+        grid.innerHTML = reviews.map(r => `
+                <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100">
+                    <div class="flex gap-1 mb-4"><i class="fa-solid fa-star star"></i><i class="fa-solid fa-star star"></i><i class="fa-solid fa-star star"></i><i class="fa-solid fa-star star"></i><i class="fa-solid fa-star star"></i></div>
+                    <p class="italic text-gray-700 mb-6">"${r.review}"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center text-xl">🐾</div>
+                        <div><p class="font-semibold">${r.name}</p><p class="text-sm text-gray-500">${r.location} • ${r.date}</p></div>
+                    </div>
+                    <p class="text-xs text-amber-600 mt-4">Bought a ${r.breed}</p>
+                </div>
+            `).join('');
+    }
+
+    function inquire(name) {
+        const message = encodeURIComponent(`Hi! I'm interested in ${name}. Can you tell me more?`);
+        window.open(`https://wa.me/61400000000?text=${message}`, '_blank');
+    }
+
+    function showMessageForPuppy(name, breed) {
+        alert(`Message sent to admin about ${name} (${breed}).\n\nWe will contact you soon.`);
+    }
+
+    // Modal show/hide
+    function showRegisterModal() { document.getElementById('registerModal').classList.remove('hidden'); }
+    function hideRegisterModal() { document.getElementById('registerModal').classList.add('hidden'); }
+    function showLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); }
+    function hideLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+    function hideVerifyModal() { document.getElementById('verifyModal').classList.add('hidden'); }
+    function showListPuppyModal() {
+        if (!isAdmin) return alert('Admin access required. Please log in with an admin account.');
+        document.getElementById('listPuppyModal').classList.remove('hidden');
+    }
+    function hideListPuppyModal() { document.getElementById('listPuppyModal').classList.add('hidden'); }
+
+    async function registerUser() {
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        if (!email || !password) return alert('Please enter email and password.');
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            if (res.ok) {
+                pendingEmail = email;
+                hideRegisterModal();
+                document.getElementById('verifyModal').classList.remove('hidden');
+            } else {
+                alert(await getErrorMessage(res));
+            }
+        } catch (e) { alert('Network error. Please try again.'); }
+    }
+
+    async function verifyCode() {
+        const code = document.getElementById('verifyCode').value;
+        if (!code) return alert('Please enter the verification code.');
+        try {
+            const res = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pendingEmail, code })
+            });
+            if (res.ok) {
+                hideVerifyModal();
+                alert('✅ Account verified! You can now log in.');
+            } else {
+                alert(await getErrorMessage(res));
+            }
+        } catch (e) { alert('Network error. Please try again.'); }
+    }
+
+    async function loginUser() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        if (!email || !password) return alert('Please enter email and password.');
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                authToken = data.token;
+                userRole = data.role;
+                isLoggedIn = true;
+                isAdmin = (userRole === 'ADMIN');
+                hideLoginModal();
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                if (isAdmin) document.getElementById('adminBtn').classList.remove('hidden');
+                alert(`✅ Welcome back, ${email}!`);
+            } else {
+                alert(await getErrorMessage(res));
+            }
+        } catch (e) { alert('Network error. Please try again.'); }
+    }
+
+    function logoutUser() {
+        authToken = null;
+        userRole = null;
+        isLoggedIn = false;
+        isAdmin = false;
+        document.getElementById('adminBtn').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.add('hidden');
+        alert('You have been logged out.');
+    }
+
+    async function submitPuppyListing() {
+        if (!isAdmin || !authToken) return alert('Admin access required.');
+        const form = new FormData();
+        form.append('name', document.getElementById('puppyName').value);
+        form.append('breed', document.getElementById('puppyBreed').value);
+        form.append('location', document.getElementById('puppyLocation').value);
+        form.append('price', document.getElementById('puppyPrice').value);
+        form.append('description', document.getElementById('puppyDesc').value);
+        const photo = document.getElementById('puppyPhoto').files[0];
+        if (photo) form.append('image', photo);
+        try {
+            const res = await fetch('/api/admin/dogs', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + authToken },
+                body: form
+            });
+            if (res.ok) {
+                hideListPuppyModal();
+                alert('✅ Puppy listed successfully!');
+                renderPuppies();
+            } else {
+                alert(await getErrorMessage(res));
+            }
+        } catch (e) { alert('Network error. Please try again.'); }
+    }
+
+    async function openMessenger() {
+        // Lazy-load the chatbot fragment and show the chat window
+        if (!window.AussiePawChat) {
+            try {
+                const html = await (await fetch('/chat/ui')).text();
+                const holderId = 'aussiepaw-chat-holder';
+                let holder = document.getElementById(holderId);
+                if (!holder) {
+                    holder = document.createElement('div');
+                    holder.id = holderId;
+                    document.body.appendChild(holder);
+                }
+                holder.innerHTML = html;
+                // Execute any <script> tags in the injected HTML so functions like sendChat() become global
+                holder.querySelectorAll('script').forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    if (oldScript.src) { newScript.src = oldScript.src; }
+                    else { newScript.textContent = oldScript.textContent; }
+                    document.body.appendChild(newScript);
+                    oldScript.remove();
+                });
+            } catch (e) {
+                alert('Failed to load chat. Please try again.');
+                return;
+            }
+        }
+        if (window.AussiePawChat && window.AussiePawChat.show) {
+            window.AussiePawChat.show();
+        }
+    }
+
+    // Search handler
+    document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('searchBtn').addEventListener('click', async function() {
+        const query = document.getElementById('search').value.trim();
+        if (!query) { renderPuppies(); return; }
+        const grid = document.getElementById('puppy-grid');
+        try {
+            const res = await fetch('/api/dogs/search?q=' + encodeURIComponent(query));
+            if (!res.ok) { grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>'; return; }
+            const puppies = await res.json();
+            if (puppies.length === 0) {
+                grid.innerHTML = `<p class="col-span-4 text-center text-gray-500">No puppies found for '${query}' \u2014 try a different breed!</p>`;
+                return;
+            }
+            grid.innerHTML = puppies.map(p => {
+                const imgSrc = p.imageUrl || 'https://placedog.net/400/300';
+                return `
+                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition">
+                    <img src="${imgSrc}" class="w-full object-cover" style="height:200px" alt="${p.name}">
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg">${p.name}</h3>
+                        <p class="text-amber-500 font-bold">$${p.price}</p>
+                        <p class="text-gray-500 text-sm">${p.breed} • ${p.location}</p>
+                        <div class="grid grid-cols-2 gap-2 mt-4">
+                            <button onclick="openMessenger()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
+                                <i class="fa-solid fa-envelope"></i> Message Us
+                            </button>
+                            <button onclick="window.open('https://wa.me/61489980105','_blank')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
+                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        } catch (e) {
+            grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>';
+        }
+    });
+    });
+
+    // Initialize
+    renderPuppies();
+    renderReviews();
+</script>
+</body>
+</html>
