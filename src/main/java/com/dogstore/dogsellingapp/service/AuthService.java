@@ -18,7 +18,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final EmailService emailService;
+    private final ResendEmailService resendEmailService;
 
     public MessageResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -36,7 +36,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-        emailService.sendVerificationCode(request.getEmail(), code);
+        resendEmailService.sendVerificationEmail(request.getEmail(), code);
 
         return new MessageResponse("Registration successful. Please check your email for the verification code.");
     }
