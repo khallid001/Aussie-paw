@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/dogs")
@@ -27,8 +28,8 @@ public class AdminDogController {
             @RequestParam String location,
             @RequestParam BigDecimal price,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) MultipartFile image) throws IOException {
-        return ResponseEntity.ok(dogService.createDog(name, breed, location, price, description, image));
+            @RequestParam(required = false) List<MultipartFile> images) throws IOException {
+        return ResponseEntity.ok(dogService.createDog(name, breed, location, price, description, images));
     }
 
     @PutMapping("/{id}")
@@ -40,8 +41,8 @@ public class AdminDogController {
             @RequestParam(required = false) String location,
             @RequestParam(required = false) BigDecimal price,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) MultipartFile image) throws IOException {
-        return ResponseEntity.ok(dogService.updateDog(id, name, breed, location, price, description, image));
+            @RequestParam(required = false) List<MultipartFile> images) throws IOException {
+        return ResponseEntity.ok(dogService.updateDog(id, name, breed, location, price, description, images));
     }
 
     @DeleteMapping("/{id}")

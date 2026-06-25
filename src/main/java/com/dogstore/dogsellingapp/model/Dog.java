@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "dogs")
@@ -34,7 +36,9 @@ public class Dog {
     @Column(length = 2000)
     private String description;
 
-    private String imageUrl;
+    @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<DogImage> images = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

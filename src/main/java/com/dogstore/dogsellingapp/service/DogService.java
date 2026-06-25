@@ -2,6 +2,7 @@ package com.dogstore.dogsellingapp.service;
 
 import com.dogstore.dogsellingapp.dto.DogResponse;
 import com.dogstore.dogsellingapp.model.Dog;
+import com.dogstore.dogsellingapp.model.DogImage;
 import com.dogstore.dogsellingapp.repository.DogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -43,23 +44,29 @@ public class DogService {
     }
 
     public DogResponse createDog(String name, String breed, String location,
-                                  BigDecimal price, String description, MultipartFile image) throws IOException {
-        String imageUrl = saveImage(image);
-
+                                  BigDecimal price, String description, List<MultipartFile> images) throws IOException {
         Dog dog = Dog.builder()
                 .name(name)
                 .breed(breed)
                 .location(location)
                 .price(price)
                 .description(description)
-                .imageUrl(imageUrl)
                 .build();
+
+        if (images != null) {
+            for (MultipartFile image : images) {
+                String imageUrl = saveImage(image);
+                if (imageUrl != null) {
+                    dog.getImages().add(DogImage.builder().imageUrl(imageUrl).dog(dog).build());
+                }
+            }
+        }
 
         return toResponse(dogRepository.save(dog));
     }
 
     public DogResponse updateDog(Long id, String name, String breed, String location,
-                                  BigDecimal price, String description, MultipartFile image) throws IOException {
+                                  BigDecimal price, String description, List<MultipartFile> images) throws IOException {
         Dog dog = dogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Dog not found with id: " + id));
 
@@ -68,8 +75,14 @@ public class DogService {
         if (location != null) dog.setLocation(location);
         if (price != null) dog.setPrice(price);
         if (description != null) dog.setDescription(description);
-        if (image != null && !image.isEmpty()) {
-            dog.setImageUrl(saveImage(image));
+        if (images != null && !images.isEmpty()) {
+            dog.getImages().clear();
+            for (MultipartFile image : images) {
+                String imageUrl = saveImage(image);
+                if (imageUrl != null) {
+                    dog.getImages().add(DogImage.builder().imageUrl(imageUrl).dog(dog).build());
+                }
+            }
         }
 
         return toResponse(dogRepository.save(dog));
@@ -97,6 +110,9 @@ public class DogService {
     }
 
     private DogResponse toResponse(Dog dog) {
+        List<String> imageUrls = dog.getImages().stream()
+                .map(DogImage::getImageUrl)
+                .toList();
         return DogResponse.builder()
                 .id(dog.getId())
                 .name(dog.getName())
@@ -104,7 +120,7 @@ public class DogService {
                 .location(dog.getLocation())
                 .price(dog.getPrice())
                 .description(dog.getDescription())
-                .imageUrl(dog.getImageUrl())
+                .imageUrls(imageUrls)
                 .createdAt(dog.getCreatedAt())
                 .build();
     }
