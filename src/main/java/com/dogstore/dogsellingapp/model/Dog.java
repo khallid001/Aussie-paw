@@ -33,8 +33,21 @@ public class Dog {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
+
+    private String gender;
+
+    private String age;
+
+    private String type;
+
+    private String microchipNumber;
+
+    private String sourceNumber;
+
+    @Column(columnDefinition = "TEXT")
+    private String sellerInfo;
 
     @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

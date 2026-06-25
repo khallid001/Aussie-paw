@@ -28,8 +28,15 @@ public class AdminDogController {
             @RequestParam String location,
             @RequestParam BigDecimal price,
             @RequestParam(required = false) String description,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String age,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String microchipNumber,
+            @RequestParam(required = false) String sourceNumber,
+            @RequestParam(required = false) String sellerInfo,
             @RequestParam(required = false) List<MultipartFile> images) throws IOException {
-        return ResponseEntity.ok(dogService.createDog(name, breed, location, price, description, images));
+        return ResponseEntity.ok(dogService.createDog(name, breed, location, price, description,
+                gender, age, type, microchipNumber, sourceNumber, sellerInfo, images));
     }
 
     @PutMapping("/{id}")
@@ -41,8 +48,15 @@ public class AdminDogController {
             @RequestParam(required = false) String location,
             @RequestParam(required = false) BigDecimal price,
             @RequestParam(required = false) String description,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) String age,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String microchipNumber,
+            @RequestParam(required = false) String sourceNumber,
+            @RequestParam(required = false) String sellerInfo,
             @RequestParam(required = false) List<MultipartFile> images) throws IOException {
-        return ResponseEntity.ok(dogService.updateDog(id, name, breed, location, price, description, images));
+        return ResponseEntity.ok(dogService.updateDog(id, name, breed, location, price, description,
+                gender, age, type, microchipNumber, sourceNumber, sellerInfo, images));
     }
 
     @DeleteMapping("/{id}")

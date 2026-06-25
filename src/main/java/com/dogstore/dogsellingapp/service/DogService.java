@@ -47,13 +47,22 @@ public class DogService {
 
     @Transactional
     public DogResponse createDog(String name, String breed, String location,
-                                  BigDecimal price, String description, List<MultipartFile> images) throws IOException {
+                                  BigDecimal price, String description,
+                                  String gender, String age, String type,
+                                  String microchipNumber, String sourceNumber, String sellerInfo,
+                                  List<MultipartFile> images) throws IOException {
         Dog dog = Dog.builder()
                 .name(name)
                 .breed(breed)
                 .location(location)
                 .price(price)
                 .description(description)
+                .gender(gender)
+                .age(age)
+                .type(type)
+                .microchipNumber(microchipNumber)
+                .sourceNumber(sourceNumber)
+                .sellerInfo(sellerInfo)
                 .build();
 
         if (images != null) {
@@ -70,7 +79,10 @@ public class DogService {
 
     @Transactional
     public DogResponse updateDog(Long id, String name, String breed, String location,
-                                  BigDecimal price, String description, List<MultipartFile> images) throws IOException {
+                                  BigDecimal price, String description,
+                                  String gender, String age, String type,
+                                  String microchipNumber, String sourceNumber, String sellerInfo,
+                                  List<MultipartFile> images) throws IOException {
         Dog dog = dogRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Dog not found with id: " + id));
 
@@ -79,6 +91,12 @@ public class DogService {
         if (location != null) dog.setLocation(location);
         if (price != null) dog.setPrice(price);
         if (description != null) dog.setDescription(description);
+        if (gender != null) dog.setGender(gender);
+        if (age != null) dog.setAge(age);
+        if (type != null) dog.setType(type);
+        if (microchipNumber != null) dog.setMicrochipNumber(microchipNumber);
+        if (sourceNumber != null) dog.setSourceNumber(sourceNumber);
+        if (sellerInfo != null) dog.setSellerInfo(sellerInfo);
         if (images != null && !images.isEmpty()) {
             dog.getImages().clear();
             for (MultipartFile image : images) {
@@ -125,6 +143,12 @@ public class DogService {
                 .location(dog.getLocation())
                 .price(dog.getPrice())
                 .description(dog.getDescription())
+                .gender(dog.getGender())
+                .age(dog.getAge())
+                .type(dog.getType())
+                .microchipNumber(dog.getMicrochipNumber())
+                .sourceNumber(dog.getSourceNumber())
+                .sellerInfo(dog.getSellerInfo())
                 .imageUrls(imageUrls)
                 .createdAt(dog.getCreatedAt())
                 .build();

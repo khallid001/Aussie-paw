@@ -81,7 +81,21 @@
         <input type="text" id="puppyBreed" placeholder="Breed" class="w-full px-4 py-3 border rounded-2xl mb-4">
         <input type="text" id="puppyLocation" placeholder="Location" class="w-full px-4 py-3 border rounded-2xl mb-4">
         <input type="number" id="puppyPrice" placeholder="Price in AUD" class="w-full px-4 py-3 border rounded-2xl mb-4">
-        <textarea id="puppyDesc" placeholder="Description" class="w-full px-4 py-3 border rounded-2xl mb-4 h-24"></textarea>
+        <textarea id="puppyDesc" placeholder="Description" rows="5" class="w-full px-4 py-3 border rounded-2xl mb-4"></textarea>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <select id="puppyGender" class="w-full px-4 py-3 border rounded-2xl text-gray-500">
+                <option value="">Gender (optional)</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+            <input type="text" id="puppyAge" placeholder="Age (optional)" class="w-full px-4 py-3 border rounded-2xl">
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <input type="text" id="puppyType" placeholder="Type (optional)" class="w-full px-4 py-3 border rounded-2xl">
+            <input type="text" id="puppyMicrochip" placeholder="Microchip # (optional)" class="w-full px-4 py-3 border rounded-2xl">
+        </div>
+        <input type="text" id="puppySource" placeholder="Source Number (optional)" class="w-full px-4 py-3 border rounded-2xl mb-4">
+        <textarea id="puppySellerInfo" placeholder="About the Seller / Family (optional)" rows="4" class="w-full px-4 py-3 border rounded-2xl mb-4"></textarea>
         <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Upload Photos</label>
             <input type="file" id="puppyPhoto" accept="image/*" multiple class="w-full px-4 py-3 border rounded-2xl">
@@ -236,29 +250,42 @@
             if (!res.ok) { grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>'; return; }
             const puppies = await res.json();
             if (puppies.length === 0) { grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">No puppies listed yet.</p>'; return; }
-            grid.innerHTML = puppies.map(p => {
-                const imgSrc = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : 'https://placedog.net/400/300';
-                return `
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <img src="${imgSrc}" class="w-full object-cover" style="height:200px" alt="${p.name}">
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg">${p.name}</h3>
-                        <p class="text-amber-500 font-bold">$${p.price}</p>
-                        <p class="text-gray-500 text-sm">${p.breed} • ${p.location}</p>
-                        <div class="grid grid-cols-2 gap-2 mt-4">
-                            <button onclick="openMessenger()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
-                                <i class="fa-solid fa-envelope"></i> Message Us
-                            </button>
-                            <button onclick="window.open('https://wa.me/61489980105','_blank')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
-                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
+            grid.innerHTML = puppies.map(p => puppyCard(p)).join('');
         } catch (e) {
             grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>';
         }
+    }
+
+    function puppyCard(p) {
+        const imgSrc = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : 'https://placedog.net/400/300';
+        const tags = [p.gender, p.age, p.type].filter(Boolean);
+        const tagsHtml = tags.length > 0 ? `<div class="flex flex-wrap gap-1 mt-2">${tags.map(t => `<span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">${t}</span>`).join('')}</div>` : '';
+        const detailRows = [
+            p.microchipNumber ? `<span class="text-xs text-gray-400"><i class="fa-solid fa-microchip"></i> ${p.microchipNumber}</span>` : '',
+            p.sourceNumber ? `<span class="text-xs text-gray-400">Source: ${p.sourceNumber}</span>` : ''
+        ].filter(Boolean).join(' • ');
+        const sellerHtml = p.sellerInfo ? `<p class="text-xs text-gray-500 mt-2 line-clamp-2"><strong>Seller:</strong> ${p.sellerInfo}</p>` : '';
+        return `
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition">
+            <img src="${imgSrc}" class="w-full object-cover" style="height:200px" alt="${p.name}">
+            <div class="p-5">
+                <h3 class="font-bold text-lg">${p.name}</h3>
+                <p class="text-amber-500 font-bold">$${p.price}</p>
+                <p class="text-gray-500 text-sm">${p.breed} • ${p.location}</p>
+                ${tagsHtml}
+                ${detailRows ? `<p class="mt-1">${detailRows}</p>` : ''}
+                ${sellerHtml}
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="openMessenger()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
+                        <i class="fa-solid fa-envelope"></i> Message Us
+                    </button>
+                    <button onclick="window.open('https://wa.me/61489980105','_blank')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+        `;
     }
 
     function renderReviews() {
@@ -381,12 +408,30 @@
 
     async function submitPuppyListing() {
         if (!isAdmin || !authToken) return alert('Admin access required.');
+        const name = document.getElementById('puppyName').value;
+        const breed = document.getElementById('puppyBreed').value;
+        const location = document.getElementById('puppyLocation').value;
+        const price = document.getElementById('puppyPrice').value;
+        const description = document.getElementById('puppyDesc').value;
+        if (!name || !breed || !location || !price || !description) return alert('Please fill in Name, Breed, Location, Price, and Description.');
         const form = new FormData();
-        form.append('name', document.getElementById('puppyName').value);
-        form.append('breed', document.getElementById('puppyBreed').value);
-        form.append('location', document.getElementById('puppyLocation').value);
-        form.append('price', document.getElementById('puppyPrice').value);
-        form.append('description', document.getElementById('puppyDesc').value);
+        form.append('name', name);
+        form.append('breed', breed);
+        form.append('location', location);
+        form.append('price', price);
+        form.append('description', description);
+        const gender = document.getElementById('puppyGender').value;
+        const age = document.getElementById('puppyAge').value;
+        const type = document.getElementById('puppyType').value;
+        const microchipNumber = document.getElementById('puppyMicrochip').value;
+        const sourceNumber = document.getElementById('puppySource').value;
+        const sellerInfo = document.getElementById('puppySellerInfo').value;
+        if (gender) form.append('gender', gender);
+        if (age) form.append('age', age);
+        if (type) form.append('type', type);
+        if (microchipNumber) form.append('microchipNumber', microchipNumber);
+        if (sourceNumber) form.append('sourceNumber', sourceNumber);
+        if (sellerInfo) form.append('sellerInfo', sellerInfo);
         const photos = document.getElementById('puppyPhoto').files;
         for (let i = 0; i < photos.length; i++) {
             form.append('images', photos[i]);
@@ -465,26 +510,7 @@
                 grid.innerHTML = `<p class="col-span-4 text-center text-gray-500">No puppies found for '${query}' \u2014 try a different breed!</p>`;
                 return;
             }
-            grid.innerHTML = puppies.map(p => {
-                const imgSrc = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : 'https://placedog.net/400/300';
-                return `
-                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <img src="${imgSrc}" class="w-full object-cover" style="height:200px" alt="${p.name}">
-                    <div class="p-5">
-                        <h3 class="font-bold text-lg">${p.name}</h3>
-                        <p class="text-amber-500 font-bold">$${p.price}</p>
-                        <p class="text-gray-500 text-sm">${p.breed} • ${p.location}</p>
-                        <div class="grid grid-cols-2 gap-2 mt-4">
-                            <button onclick="openMessenger()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
-                                <i class="fa-solid fa-envelope"></i> Message Us
-                            </button>
-                            <button onclick="window.open('https://wa.me/61489980105','_blank')" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-1 text-sm">
-                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
+            grid.innerHTML = puppies.map(p => puppyCard(p)).join('');
         } catch (e) {
             grid.innerHTML = '<p class="col-span-4 text-center text-gray-500">Could not load puppies.</p>';
         }

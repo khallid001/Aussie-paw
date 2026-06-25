@@ -16,6 +16,12 @@ public class DogResponse {
     private String location;
     private BigDecimal price;
     private String description;
+    private String gender;
+    private String age;
+    private String type;
+    private String microchipNumber;
+    private String sourceNumber;
+    private String sellerInfo;
     private List<String> imageUrls;
     private LocalDateTime createdAt;
 }
