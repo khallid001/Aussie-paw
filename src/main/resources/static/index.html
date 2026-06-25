@@ -12,6 +12,8 @@
         .pup-card:hover { transform: scale(1.05); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
         .star { color: #facc15; }
         .floating-btn { position: fixed; bottom: 20px; right: 20px; z-index: 50; }
+        .carousel-frame { display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f3f4f6; }
+        .carousel-image { width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -147,13 +149,6 @@
     </div>
 </div>
 
-<!-- Featured Puppies -->
-<section class="max-w-7xl mx-auto px-6 py-16">
-    <h2 class="text-4xl font-bold text-center mb-4">Puppies Ready for Their Forever Home</h2>
-    <p class="text-center text-gray-600 mb-12">Popular in Australia 2026</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="puppy-grid"></div>
-</section>
-
 <!-- Popular Breeds -->
 <section class="bg-gray-100 py-16">
     <div class="max-w-7xl mx-auto px-6">
@@ -167,6 +162,13 @@
             <div onclick="filterByBreed('Border Collie')" class="bg-white p-6 rounded-3xl text-center cursor-pointer hover:shadow-xl">Border Collie</div>
         </div>
     </div>
+</section>
+
+<!-- Featured Puppies -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+    <h2 class="text-4xl font-bold text-center mb-4">Puppies Ready for Their Forever Home</h2>
+    <p class="text-center text-gray-600 mb-12">Popular in Australia 2026</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="puppy-grid"></div>
 </section>
 
 <!-- 12 Customer Reviews -->
@@ -269,10 +271,10 @@
         const id = 'carousel-' + (carouselIdCounter++);
         const imgs = (images && images.length > 0) ? images : ['https://placedog.net/400/300'];
         const multi = imgs.length > 1;
-        const imgsHtml = imgs.map((url, i) => `<img src="${url}" class="w-full object-cover" style="height:${height};display:${i === 0 ? 'block' : 'none'}" alt="${altText}" data-carousel-index="${i}">`).join('');
+        const imgsHtml = imgs.map((url, i) => `<img src="${url}" class="carousel-image" style="display:${i === 0 ? 'block' : 'none'};" alt="${altText}" data-carousel-index="${i}">`).join('');
         const arrows = multi ? `<button onclick="event.stopPropagation(); carouselNav('${id}', -1)" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm z-20"><i class="fa-solid fa-chevron-left"></i></button><button onclick="event.stopPropagation(); carouselNav('${id}', 1)" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm z-20"><i class="fa-solid fa-chevron-right"></i></button>` : '';
         const dots = multi ? `<div class="flex justify-center gap-1.5 py-2">${imgs.map((_, i) => `<span class="w-2 h-2 rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-gray-300'} inline-block" data-carousel-dot="${i}"></span>`).join('')}</div>` : '';
-        return `<div id="${id}" class="relative" data-carousel-current="0" data-carousel-count="${imgs.length}">${imgsHtml}${arrows}${dots}</div>`;
+        return `<div id="${id}" class="relative" data-carousel-current="0" data-carousel-count="${imgs.length}"><div class="carousel-frame relative" style="height:${height}">${imgsHtml}${arrows}</div>${dots}</div>`;
     }
 
     function carouselNav(id, dir) {
@@ -298,14 +300,14 @@
             p.sourceNumber ? `<span class="text-xs text-gray-400">Source: ${p.sourceNumber}</span>` : ''
         ].filter(Boolean).join(' • ');
         const sellerHtml = p.sellerInfo ? `<p class="text-xs text-gray-500 mt-2 line-clamp-2"><strong>Seller:</strong> ${p.sellerInfo}</p>` : '';
-        const deleteBtn = isAdmin ? `<button onclick="event.stopPropagation(); deleteDog(${p.id})" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-sm" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '';
+        const deleteBtnInner = `<button onclick="event.stopPropagation(); deleteDog(${p.id})" class="bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-sm" title="Delete"><i class="fa-solid fa-trash"></i></button>`;
         const soldBadge = p.status === 'SOLD' ? `<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none z-10"><span class="bg-red-600/90 text-white text-2xl font-extrabold px-6 py-2 rounded-xl rotate-[-18deg] shadow-lg tracking-widest border-4 border-white/60">SOLD</span></div>` : '';
-        const statusBtn = isAdmin ? `<button onclick="event.stopPropagation(); toggleDogStatus(${p.id}, '${p.status}')" class="absolute top-2 left-2 ${p.status === 'SOLD' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-600'} text-white text-xs px-3 py-1.5 rounded-full shadow-lg font-medium z-20" title="Toggle status">${p.status === 'SOLD' ? 'Mark Available' : 'Mark as Sold'}</button>` : '';
+        const statusBtnInner = `<button onclick="event.stopPropagation(); toggleDogStatus(${p.id}, '${p.status}')" class="${p.status === 'SOLD' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-600'} text-white text-xs px-3 py-1.5 rounded-full shadow-lg font-medium" title="Toggle status">${p.status === 'SOLD' ? 'Mark Available' : 'Mark as Sold'}</button>`;
+        const adminControls = isAdmin ? `<div class="relative z-20 flex items-center justify-end gap-2 px-5 pt-5 pb-3"><div>${statusBtnInner}</div><div>${deleteBtnInner}</div></div>` : '';
         const carouselHtml = createImageCarousel(p.imageUrls, '200px', p.name);
         return `
         <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer relative" onclick="showDogDetail(${p.id})">
-            ${deleteBtn}
-            ${statusBtn}
+            ${adminControls}
             ${soldBadge}
             ${carouselHtml}
             <div class="p-5">
