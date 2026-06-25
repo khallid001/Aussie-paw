@@ -6,6 +6,7 @@ import com.dogstore.dogsellingapp.model.DogImage;
 import com.dogstore.dogsellingapp.repository.DogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DogService {
 
     private final DogRepository dogRepository;
@@ -43,6 +45,7 @@ public class DogService {
         return toResponse(dog);
     }
 
+    @Transactional
     public DogResponse createDog(String name, String breed, String location,
                                   BigDecimal price, String description, List<MultipartFile> images) throws IOException {
         Dog dog = Dog.builder()
@@ -65,6 +68,7 @@ public class DogService {
         return toResponse(dogRepository.save(dog));
     }
 
+    @Transactional
     public DogResponse updateDog(Long id, String name, String breed, String location,
                                   BigDecimal price, String description, List<MultipartFile> images) throws IOException {
         Dog dog = dogRepository.findById(id)
@@ -88,6 +92,7 @@ public class DogService {
         return toResponse(dogRepository.save(dog));
     }
 
+    @Transactional
     public void deleteDog(Long id) {
         if (!dogRepository.existsById(id)) {
             throw new IllegalArgumentException("Dog not found with id: " + id);
