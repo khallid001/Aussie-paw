@@ -25,7 +25,7 @@ public class DogService {
 
     private final DogRepository dogRepository;
 
-    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+    private static final String UPLOAD_DIR = "/app/uploads/";
 
     public List<DogResponse> getAllDogs() {
         return dogRepository.findAll().stream().map(this::toResponse).toList();
