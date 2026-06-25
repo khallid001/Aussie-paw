@@ -2,6 +2,7 @@ package com.dogstore.dogsellingapp.controller;
 
 import com.dogstore.dogsellingapp.dto.DogResponse;
 import com.dogstore.dogsellingapp.dto.MessageResponse;
+import com.dogstore.dogsellingapp.model.DogStatus;
 import com.dogstore.dogsellingapp.service.DogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,14 @@ public class AdminDogController {
             @RequestParam(required = false) List<MultipartFile> images) throws IOException {
         return ResponseEntity.ok(dogService.updateDog(id, name, breed, location, price, description,
                 gender, age, type, microchipNumber, sourceNumber, sellerInfo, images));
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DogResponse> updateDogStatus(
+            @PathVariable Long id,
+            @RequestParam DogStatus status) {
+        return ResponseEntity.ok(dogService.updateDogStatus(id, status));
     }
 
     @DeleteMapping("/{id}")

@@ -3,6 +3,7 @@ package com.dogstore.dogsellingapp.service;
 import com.dogstore.dogsellingapp.dto.DogResponse;
 import com.dogstore.dogsellingapp.model.Dog;
 import com.dogstore.dogsellingapp.model.DogImage;
+import com.dogstore.dogsellingapp.model.DogStatus;
 import com.dogstore.dogsellingapp.repository.DogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -111,6 +112,14 @@ public class DogService {
     }
 
     @Transactional
+    public DogResponse updateDogStatus(Long id, DogStatus status) {
+        Dog dog = dogRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Dog not found with id: " + id));
+        dog.setStatus(status);
+        return toResponse(dogRepository.save(dog));
+    }
+
+    @Transactional
     public void deleteDog(Long id) {
         if (!dogRepository.existsById(id)) {
             throw new IllegalArgumentException("Dog not found with id: " + id);
@@ -151,6 +160,7 @@ public class DogService {
                 .sellerInfo(dog.getSellerInfo())
                 .imageUrls(imageUrls)
                 .createdAt(dog.getCreatedAt())
+                .status(dog.getStatus().name())
                 .build();
     }
 }

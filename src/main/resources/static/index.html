@@ -264,8 +264,33 @@
         }
     }
 
+    let carouselIdCounter = 0;
+    function createImageCarousel(images, height, altText) {
+        const id = 'carousel-' + (carouselIdCounter++);
+        const imgs = (images && images.length > 0) ? images : ['https://placedog.net/400/300'];
+        const multi = imgs.length > 1;
+        const imgsHtml = imgs.map((url, i) => `<img src="${url}" class="w-full object-cover" style="height:${height};display:${i === 0 ? 'block' : 'none'}" alt="${altText}" data-carousel-index="${i}">`).join('');
+        const arrows = multi ? `<button onclick="event.stopPropagation(); carouselNav('${id}', -1)" class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm z-20"><i class="fa-solid fa-chevron-left"></i></button><button onclick="event.stopPropagation(); carouselNav('${id}', 1)" class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm z-20"><i class="fa-solid fa-chevron-right"></i></button>` : '';
+        const dots = multi ? `<div class="flex justify-center gap-1.5 py-2">${imgs.map((_, i) => `<span class="w-2 h-2 rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-gray-300'} inline-block" data-carousel-dot="${i}"></span>`).join('')}</div>` : '';
+        return `<div id="${id}" class="relative" data-carousel-current="0" data-carousel-count="${imgs.length}">${imgsHtml}${arrows}${dots}</div>`;
+    }
+
+    function carouselNav(id, dir) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const count = parseInt(el.dataset.carouselCount);
+        let cur = parseInt(el.dataset.carouselCurrent);
+        const imgs = el.querySelectorAll('img[data-carousel-index]');
+        const dots = el.querySelectorAll('span[data-carousel-dot]');
+        imgs[cur].style.display = 'none';
+        if (dots[cur]) { dots[cur].className = dots[cur].className.replace('bg-amber-500', 'bg-gray-300'); }
+        cur = (cur + dir + count) % count;
+        imgs[cur].style.display = 'block';
+        if (dots[cur]) { dots[cur].className = dots[cur].className.replace('bg-gray-300', 'bg-amber-500'); }
+        el.dataset.carouselCurrent = cur;
+    }
+
     function puppyCard(p) {
-        const imgSrc = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls[0] : 'https://placedog.net/400/300';
         const tags = [p.gender, p.age, p.type].filter(Boolean);
         const tagsHtml = tags.length > 0 ? `<div class="flex flex-wrap gap-1 mt-2">${tags.map(t => `<span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full">${t}</span>`).join('')}</div>` : '';
         const detailRows = [
@@ -274,10 +299,15 @@
         ].filter(Boolean).join(' • ');
         const sellerHtml = p.sellerInfo ? `<p class="text-xs text-gray-500 mt-2 line-clamp-2"><strong>Seller:</strong> ${p.sellerInfo}</p>` : '';
         const deleteBtn = isAdmin ? `<button onclick="event.stopPropagation(); deleteDog(${p.id})" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg text-sm" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '';
+        const soldBadge = p.status === 'SOLD' ? `<div class="absolute top-0 left-0 w-full h-full flex items-center justify-center pointer-events-none z-10"><span class="bg-red-600/90 text-white text-2xl font-extrabold px-6 py-2 rounded-xl rotate-[-18deg] shadow-lg tracking-widest border-4 border-white/60">SOLD</span></div>` : '';
+        const statusBtn = isAdmin ? `<button onclick="event.stopPropagation(); toggleDogStatus(${p.id}, '${p.status}')" class="absolute top-2 left-2 ${p.status === 'SOLD' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-600'} text-white text-xs px-3 py-1.5 rounded-full shadow-lg font-medium z-20" title="Toggle status">${p.status === 'SOLD' ? 'Mark Available' : 'Mark as Sold'}</button>` : '';
+        const carouselHtml = createImageCarousel(p.imageUrls, '200px', p.name);
         return `
         <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer relative" onclick="showDogDetail(${p.id})">
             ${deleteBtn}
-            <img src="${imgSrc}" class="w-full object-cover" style="height:200px" alt="${p.name}">
+            ${statusBtn}
+            ${soldBadge}
+            ${carouselHtml}
             <div class="p-5">
                 <h3 class="font-bold text-lg">${p.name}</h3>
                 <p class="text-amber-500 font-bold">$${p.price}</p>
@@ -288,6 +318,22 @@
             </div>
         </div>
         `;
+    }
+
+    async function toggleDogStatus(id, currentStatus) {
+        if (!isAdmin || !authToken) return alert('Admin access required.');
+        const newStatus = currentStatus === 'SOLD' ? 'AVAILABLE' : 'SOLD';
+        try {
+            const res = await fetch(`/api/admin/dogs/${id}/status?status=${newStatus}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            });
+            if (res.ok) {
+                renderPuppies();
+            } else {
+                alert(await getErrorMessage(res));
+            }
+        } catch (e) { alert('Network error. Please try again.'); }
     }
 
     async function deleteDog(id) {
@@ -312,8 +358,7 @@
             const res = await fetch('/api/dogs/' + id);
             if (!res.ok) return alert('Could not load dog details.');
             const p = await res.json();
-            const images = (p.imageUrls && p.imageUrls.length > 0) ? p.imageUrls : ['https://placedog.net/400/300'];
-            const imagesHtml = images.map(url => `<img src="${url}" class="w-full rounded-2xl object-cover mb-3" alt="${p.name}">`).join('');
+            const imagesHtml = createImageCarousel(p.imageUrls, '350px', p.name);
             const tags = [p.gender, p.age, p.type].filter(Boolean);
             const tagsHtml = tags.length > 0 ? `<div class="flex flex-wrap gap-2 mb-3">${tags.map(t => `<span class="bg-amber-100 text-amber-800 text-sm px-3 py-1 rounded-full">${t}</span>`).join('')}</div>` : '';
             const fields = [
@@ -322,8 +367,10 @@
                 p.sourceNumber ? `<p class="text-sm text-gray-600"><strong>Source Number:</strong> ${p.sourceNumber}</p>` : '',
                 p.sellerInfo ? `<div class="mt-3 p-4 bg-gray-50 rounded-2xl"><h4 class="font-semibold text-gray-700 mb-1">About the Seller / Family</h4><p class="text-gray-600 text-sm">${p.sellerInfo}</p></div>` : ''
             ].filter(Boolean).join('');
+            const detailSoldBadge = p.status === 'SOLD' ? `<span class="inline-block bg-red-600 text-white text-sm font-bold px-4 py-1 rounded-full mb-3 tracking-wide">SOLD</span>` : '';
             document.getElementById('dogDetailContent').innerHTML = `
                 <h2 class="text-3xl font-bold mb-2">${p.name}</h2>
+                ${detailSoldBadge}
                 <p class="text-amber-500 font-bold text-2xl mb-1">$${p.price}</p>
                 <p class="text-gray-500 mb-4">${p.breed} • ${p.location}</p>
                 ${tagsHtml}

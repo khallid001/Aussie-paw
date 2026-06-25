@@ -24,4 +24,5 @@ public class DogResponse {
     private String sellerInfo;
     private List<String> imageUrls;
     private LocalDateTime createdAt;
+    private String status;
 }

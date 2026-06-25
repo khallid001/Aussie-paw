@@ -49,6 +49,11 @@ public class Dog {
     @Column(columnDefinition = "TEXT")
     private String sellerInfo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private DogStatus status = DogStatus.AVAILABLE;
+
     @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<DogImage> images = new ArrayList<>();
