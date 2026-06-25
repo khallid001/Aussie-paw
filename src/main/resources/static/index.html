@@ -31,8 +31,8 @@
             <a href="#" class="hover:text-amber-600">Blog</a>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="showRegisterModal()" class="px-5 py-2 border border-amber-600 text-amber-600 rounded-full hover:bg-amber-50 font-medium">Register</button>
-            <button onclick="showLoginModal()" class="px-5 py-2 border border-gray-600 text-gray-700 rounded-full hover:bg-gray-100">Login</button>
+            <button id="registerBtn" onclick="showRegisterModal()" class="px-5 py-2 border border-amber-600 text-amber-600 rounded-full hover:bg-amber-50 font-medium">Register</button>
+            <button id="loginBtn" onclick="showLoginModal()" class="px-5 py-2 border border-gray-600 text-gray-700 rounded-full hover:bg-gray-100">Login</button>
             <button id="adminBtn" onclick="showListPuppyModal()" class="hidden bg-amber-600 text-white px-6 py-2 rounded-full font-medium hover:bg-amber-700">List a Puppy (Admin)</button>
             <button id="logoutBtn" onclick="logoutUser()" class="hidden px-5 py-2 border border-red-600 text-red-600 rounded-full hover:bg-red-50 font-medium">Logout</button>
         </div>
@@ -351,7 +351,11 @@
                 userRole = data.role;
                 isLoggedIn = true;
                 isAdmin = (userRole === 'ADMIN');
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('userRole', userRole);
                 hideLoginModal();
+                document.getElementById('registerBtn').classList.add('hidden');
+                document.getElementById('loginBtn').classList.add('hidden');
                 document.getElementById('logoutBtn').classList.remove('hidden');
                 if (isAdmin) document.getElementById('adminBtn').classList.remove('hidden');
                 alert(`✅ Welcome back, ${email}!`);
@@ -366,8 +370,12 @@
         userRole = null;
         isLoggedIn = false;
         isAdmin = false;
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
         document.getElementById('adminBtn').classList.add('hidden');
         document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('registerBtn').classList.remove('hidden');
+        document.getElementById('loginBtn').classList.remove('hidden');
         alert('You have been logged out.');
     }
 
@@ -430,6 +438,19 @@
 
     // Search handler
     document.addEventListener('DOMContentLoaded', function() {
+    // Restore login state from localStorage
+    const savedToken = localStorage.getItem('authToken');
+    const savedRole = localStorage.getItem('userRole');
+    if (savedToken) {
+        authToken = savedToken;
+        userRole = savedRole;
+        isLoggedIn = true;
+        isAdmin = (userRole === 'ADMIN');
+        document.getElementById('registerBtn').classList.add('hidden');
+        document.getElementById('loginBtn').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.remove('hidden');
+        if (isAdmin) document.getElementById('adminBtn').classList.remove('hidden');
+    }
     document.getElementById('searchBtn').addEventListener('click', async function() {
         const query = document.getElementById('search').value.trim();
         if (!query) { renderPuppies(); return; }
